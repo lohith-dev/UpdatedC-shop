@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+      <style>
+            #formcomp {
+                display: flex;
+                justify-content: center; 
+              
+            }
+            #header{
+                text-align: center;
+            }
+            h1{
+                color: orange;
+                font-family: Arial, Helvetica, sans-serif;
+                font-weight: bold;
+            }
+            .cont{
+                padding: 25px 100px;
+                border: 1px solid orange;
+            }
+            #sub-button{
+                margin-top: 15px;
+                border-radius: 5px;
+                background-color: orange;
+                padding: 8px;
+               
+            }
+            .subut{
+                padding: 11px !important;
+            }
+            form{
+                /* padding: 40px;
+                margin: auto;
+                width: 450px; */
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .candies-table{
+                margin-top: 50px;
+            }
+            #time{
+                display: flex;
+                margin-top: 8px;
+                justify-content: space-between;
+            }
+            label{
+                color: black;
+            }
+       </style>
+    </head>
+<body>
+    <script>
+
+
+
+
+
+// const candyItems = [
+//   { id: 1, candyName: 'Choco Bar', description: 'Delicious chocolate', price: 1.99, quantity: 10 },
+//   { id: 2, candyName: 'Lollipop', description: 'Colorful sweet treat', price: 0.5, quantity: 20 },
+//   { id: 3, candyName: 'Gummy Bears', description: 'Assorted fruity gummies', price: 2.49, quantity: 15 }
+// ];
+
+// Function to render candy items in the table
+async function renderCandyItems() {
+
+        let candyItems;
+            try{
+                const {data}=await axios.get('http://localhost:8000/candyData');
+                candyItems= data.data;
+
+            }catch(err){
+                console.log(err);
+            }
+                
+
+  const tableBody = document.querySelector('.candies-table tbody');
+
+  // Clear the table before re-rendering to avoid duplicating items
+  tableBody.innerHTML = '';
+
+  // Loop through the array and create table rows for each candy item
+  candyItems.forEach(item => {
+    const row = document.createElement('tr');
+    
+    row.innerHTML = `
+      <th scope="row">${item.id}</th>
+      <td>${item.candyName}</td>
+      <td>${item.description}</td>
+      <td>$${item.price}</td>
+      <td>${item.quantity}</td>
+      <td><input type="submit" onclick="updateQuantity(${item.id}, 1)"  value="buy1"></td>
+      <td><input type="submit" onclick="updateQuantity(${item.id}, 2)"  value="buy2"></td>
+      <td><input type="submit"  onclick="updateQuantity(${item.id}, 3)"   value="buy3"></td>
+    `;
+
+    tableBody.appendChild(row);
+  });
+}
+
+// Call the function to render items when the page loads
+
+var updateQuantity=async(id, qty)=>{
+        const upData={
+            id:id,
+            qty:qty
+        }
+            try{
+                const data=await axios.put('http://localhost:8000/candyData',upData);
+                 if(data.status===200){
+                    renderCandyItems();
+                 }
+
+            }catch(err){
+                console.log(err);
+        }
+}
+
+
+
+
+        window.onload =()=>{
+            const form =document.querySelector("form");
+            const buton =document.querySelector("subut");
+
+            form.addEventListener('submit', e=>{
+                if(!form.checkValidity()){
+                    e.preventDefault()
+                }
+                form.classList.add('was-validated')
+            })
+
+            renderCandyItems();
+        
+
+                // axios.get('http://localhost:8000/expenseData').then((res)=>{
+
+                //             res.data.data.forEach((expense, index) => {
+                //             // Create HTML elements to display each expense
+                //             // console.log(expense)
+                //             const parentDiv = document.getElementById('parentDiv');
+                //             const childParagraph = document.createElement('li');
+                //             childParagraph.setAttribute('data-id', expense.id);
+
+                //             childParagraph.textContent = `${expense.expense}-${expense.description}-${expense.category}`;
+                //             parentDiv.appendChild(childParagraph);
+                //             var deleteBtn = document.createElement('button');
+                //             deleteBtn.className  = 'btn btn-danger btn-sm float-right delete';
+                //             deleteBtn.appendChild(document.createTextNode('Delete'));
+
+                //             var editBtn = document.createElement('button');
+                //             editBtn.className = 'btn btn-primary btn-sm edit';
+                //             editBtn.appendChild(document.createTextNode('Edit'));
+
+                //             childParagraph.appendChild(editBtn);
+                //             childParagraph.appendChild(deleteBtn);
+                //         });
+
+                //     }).catch((err)=>{
+
+                //     console.log(err);
+                // })
+
+                // var itemList = document.getElementById('parentDiv');
+             
+
+                //     itemList.addEventListener('click', removeItem);
+
+                //     itemList.addEventListener('click', editItem);
+                 
+
+                    function removeItem(e){
+                        if(e.target.classList.contains('delete')){
+                            if(confirm('Are You Sure?')){
+                                const listItem = e.target.closest('li');
+                                 const itemId = listItem.getAttribute('data-id');
+                                 const elementToRemove = document.querySelector(`li[data-id="${itemId}"]`);
+
+                                axios.delete(`http://localhost:8000/expenseData/${itemId}`).then((res)=>{
+                                    if(res.status==200){
+                                        elementToRemove.remove();
+                                    }
+                                    }).catch((err)=>{
+                                        console.log(err);
+                                    })
+                            }
+                        }
+                    }
+
+                 function populateInputFields(descpart) {
+                    // const userData = JSON.parse(localStorage.getItem(descpart));
+                     // console.log(userData);
+                    //  Check if data exists
+
+                    if (descpart) {
+                     // Populate input fields
+                        document.getElementById('expense').value = descpart.expense;
+                        document.getElementById('desc').value = descpart.description;
+                        document.getElementById('categorySelect').value=descpart.category;
+                        const editItemIdInput = document.getElementById('editItemId');
+                       editItemIdInput.value = descpart.id;
+                    }
+                }
+
+                    function editItem(e){
+                    if(e.target.classList.contains('edit')){
+                        const listItem = e.target.closest('li');
+                        const itemId = listItem.getAttribute('data-id');
+                        let edit=null;
+                        axios.get('http://localhost:8000/expenseData').then((res)=>{
+                            edit=res.data.data.find(data=>data.id==itemId);
+                            console.log(edit);
+                             populateInputFields(edit);
+                            }).catch((err)=>{
+
+                            console.log(err);
+                            })
+
+                      
+                        // localStorage.removeItem(parts[1]);
+                        // itemList.removeChild(list);
+                    }
+                }
+
+                
+              
+                
+}
+
+
+        async function handleSubmit  (event) {
+            event.preventDefault(); 
+            const candyName = document.getElementById('candyName').value;
+            const desc = document.getElementById('desc').value;
+            const price = document.getElementById('price').value;
+            const quantity = document.getElementById('quantity').value;
+
+            const editItemId = document.getElementById('editItemId').value;
+
+                newExpense = {
+                    candyName  : candyName,
+                    description : desc,
+                    price:price,
+                    quantity : quantity,
+                  
+                }
+    
+            
+
+            // let myUser=JSON.stringify(       newExpense)
+            // localStorage.setItem(desc,myUser);
+
+            // const userData = localStorage.getItem(desc);
+            // const parsedUserData = JSON.parse(userData);
+
+                try{
+                    const data= await axios.post('http://localhost:8000/candyData',newExpense);
+                    if(data){
+                        renderCandyItems();
+                    }
+
+                }catch(err){
+                    console.log(err);
+                }
+                
+        
+                
+        
+        }
+    </script>
+    <div class="container ">
+
+        <div class="cont">
+
+            <div id="header">
+                <h1>Expense Tracker</h1>
+            </div>
+        
+        <form novalidate onSubmit="handleSubmit(event)">
+            <div class="form-floating mt-3">
+                <input  type="text" id ="candyName"class="form-control" placeholder="Enter desc" required>
+                <label for="expense" class="form-label">Candy Name:</label>
+            </div>
+            
+            <div class="form-floating mt-3">
+                <input type="text" class="form-control"  id ="desc" placeholder="Enter desc" required>
+                <label for="desc" class="form-label" >Description:</label>
+                <!-- <div class="invalid-feedback">Invalid desc</div> -->
+            </div>
+                
+            <div class="form-floating mt-3">
+                <input type="number" class="form-control"  id ="price" placeholder="Enter desc" required>
+                <label for="desc" class="form-label" >Price:</label>
+                <!-- <div class="invalid-feedback">Invalid desc</div> -->
+            </div>
+
+            <div class="form-floating mt-3">
+                <input type="number" class="form-control"  id ="quantity" placeholder="Enter desc" required>
+                <label for="desc" class="form-label" >Quantity:</label>
+                <!-- <div class="invalid-feedback">Invalid desc</div> -->
+            </div>
+            
+            <input type="hidden" id="editItemId" name="editItemId">
+                
+            <input type="submit" id ="sub-button" class="subut" value="Add Item">
+        </form>
+    </div>
+    <div class="container candies-table">
+        <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">id</th>
+                <th scope="col">CandyName</th>
+                <th scope="col">Description</th>
+                <th scope="col">Price</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Buy 1</th>
+                <th scope="col">Buy 2</th>
+                <th scope="col">Buy 3</th>
+              </tr>
+            </thead>
+            <tbody>
+             
+            </tbody>
+          </table>
+    </div>
+</div>
+</body>
+</html>
